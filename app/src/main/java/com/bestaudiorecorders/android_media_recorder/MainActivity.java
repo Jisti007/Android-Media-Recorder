@@ -7,7 +7,6 @@ import android.media.AudioRecord;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,11 +24,11 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    int frequency = 8000;
+    int sampleRate = 8000;
     int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
     int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
-    private RealDoubleFFT transformer;
     int blockSize = 256;
+    private RealDoubleFFT transformer = new RealDoubleFFT(blockSize);
 
     boolean started = false;
     RecordAudio recordTask;
@@ -41,21 +40,23 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... arg0) {
-
+            Log.d("doInBackground", "start in background");
             try {
-                // int bufferSize = AudioRecord.getMinBufferSize(frequency,
+                // int bufferSize = AudioRecord.getMinBufferSize(sampleRate,
                 // AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-                int bufferSize = AudioRecord.getMinBufferSize(frequency,
+                int bufferSize = AudioRecord.getMinBufferSize(sampleRate,
                         channelConfiguration, audioEncoding);
 
                 AudioRecord audioRecord = new AudioRecord(
-                        MediaRecorder.AudioSource.MIC, frequency,
+                        MediaRecorder.AudioSource.MIC, sampleRate,
                         channelConfiguration, audioEncoding, bufferSize);
+                Log.d("doInBackground", "initialization success");
 
                 short[] buffer = new short[blockSize];
                 double[] toTransform = new double[blockSize];
 
                 audioRecord.startRecording();
+                Log.d("doInBackground", "starting success");
 
                 // started = true; hopes this should true before calling
                 // following while loop
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
                     transformer.ft(toTransform);
                     publishProgress(toTransform);
                 }
+                Log.d("doInBackground", "Loop success");
 
                 audioRecord.stop();
 
@@ -85,12 +87,15 @@ public class MainActivity extends AppCompatActivity {
         protected void onProgressUpdate(double[]... toTransform) {
             TextView textView;
             textView = (TextView) findViewById(R.id.textView);
-            Log.d("onProgressUpdate", "Before for loop");
+            int x = 0;
+            double maxY = 0;
             for (int i = 0; i < toTransform[0].length; i++) {
-                textView.setText("Freq at " + i + ": " + toTransform[0][i] * 10);
+                if(maxY < toTransform[0][i]){
+                    x = i;
+                    maxY = toTransform[0][i];
+                }
             }
-            // TODO Auto-generated method stub
-            // super.onProgressUpdate(values);
+            textView.setText("Strongest freq: " + x*15);
         }
 
     }
@@ -142,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         if (recordPermissionGranted && writePermissionGranted) {
-            record();
+            //record();
         }
     }
 
@@ -167,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("Main", e.getMessage());
         }
-        recorder.start();
+        //recorder.start();
 	    Toast.makeText(this, "Recording to" + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
     }
 
@@ -178,19 +183,21 @@ public class MainActivity extends AppCompatActivity {
         )) {
             int status =(Integer) v.getTag();
 	        if(status == 0) {
-		        record();
+                recordTask = new RecordAudio();
+                started = true;
+                recordTask.execute();
+		        //record();
 		        recordButton.setText("Stop");
 		        v.setTag(1);
-                recordTask = new RecordAudio();
-                recordTask.execute();
 	        } else {
-		        recorder.stop();
-		        recorder.reset();
-		        recorder.release();
+		        //recorder.stop();
+		        //recorder.reset();
+		        //recorder.release();
+                started = false;
+                recordTask.cancel(true);
 		        Toast.makeText(this, "Recording stopped", Toast.LENGTH_SHORT).show();
 		        recordButton.setText("Record");
 		        v.setTag(0);
-                recordTask.cancel(true);
 	        }
         }
     }

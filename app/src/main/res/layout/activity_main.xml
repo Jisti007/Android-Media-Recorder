@@ -34,6 +34,6 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/recordText" />
+        app:layout_constraintBottom_toTopOf="@+id/recordButton" />
 
 </android.support.constraint.ConstraintLayout>
