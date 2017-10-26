@@ -14,10 +14,14 @@ import android.os.Bundle;
 import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     RecordAudio recordTask;
 
     MediaRecorder recorder;
+	private Button recordButton;
 
     public class RecordAudio extends AsyncTask<Void, double[], Void> {
 
@@ -95,6 +100,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+	    recordButton = (Button) findViewById(R.id.recordButton);
+	    recordButton.setTag(0);
+	    recordButton.setText("Record");
     }
 
     public boolean arePermissionsGranted(String... permissions) {
@@ -134,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         if (recordPermissionGranted && writePermissionGranted) {
-            //record();
+            record();
         }
     }
 
@@ -143,10 +151,15 @@ public class MainActivity extends AppCompatActivity {
         recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        File path = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS);
+        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
         path.mkdirs();
-        File file = new File(path, "recording" + Calendar.getInstance().getTime());
+
+	    Calendar cal = Calendar.getInstance();
+	    SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+	    String formatted = format1.format(cal.getTime());
+	    //default saving path: storage/emulated/0/Documents
+
+        File file = new File(path, "recording_" + formatted);
         recorder.setOutputFile(file.getAbsolutePath());
 
         try{
@@ -155,9 +168,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e("Main", e.getMessage());
         }
         recorder.start();
-
-        View recordText;
-        recordText = findViewById(R.id.recordText);
+	    Toast.makeText(this, "Recording to" + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
     }
 
     public void onClick_record(View v) {
@@ -165,16 +176,22 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.RECORD_AUDIO
         )) {
-            //record();
-            recordTask = new RecordAudio();
-            recordTask.execute();
+            int status =(Integer) v.getTag();
+	        if(status == 0) {
+		        record();
+		        recordButton.setText("Stop");
+		        v.setTag(1);
+                recordTask = new RecordAudio();
+                recordTask.execute();
+	        } else {
+		        recorder.stop();
+		        recorder.reset();
+		        recorder.release();
+		        Toast.makeText(this, "Recording stopped", Toast.LENGTH_SHORT).show();
+		        recordButton.setText("Record");
+		        v.setTag(0);
+                recordTask.cancel(true);
+	        }
         }
-    }
-
-    public void onClick_stop(View v) {
-        //recorder.stop();
-        //recorder.reset();
-        //recorder.release();
-        recordTask.cancel(true);
     }
 }
