@@ -17,7 +17,7 @@ import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
-    MediaRecorder recorder = new MediaRecorder();
+    MediaRecorder recorder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,43 +25,49 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    public  boolean isWriteStoragePermissionGranted() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                return true;
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                return false;
-            }
-        }
-        else {
-            return true;
-        }
-    }
+    public boolean arePermissionsGranted(String... permissions) {
+        boolean permissionsGranted = true;
 
-    public  boolean isAudioRecordPermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
-            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-                return true;
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
-                return false;
+            for (String permission : permissions) {
+                if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                    permissionsGranted = false;
+                    break;
+                }
             }
         }
-        else {
-            return true;
+        if (!permissionsGranted) {
+            ActivityCompat.requestPermissions(this, permissions, 1);
         }
+
+        return permissionsGranted;
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+        boolean recordPermissionGranted = false;
+        boolean writePermissionGranted = false;
+        for (int i = 0; i < grantResults.length; i++) {
+            if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                switch (permissions[i]) {
+                    case Manifest.permission.RECORD_AUDIO:
+                        recordPermissionGranted = true;
+                        break;
+                    case Manifest.permission.WRITE_EXTERNAL_STORAGE:
+                        writePermissionGranted = true;
+                        break;
+                }
+            }
+        }
+        if (recordPermissionGranted && writePermissionGranted) {
             record();
         }
     }
 
     public void record(){
+        recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
@@ -80,7 +86,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClick_record(View v) {
-        if(isWriteStoragePermissionGranted() && isAudioRecordPermissionGranted()) {
+        if (arePermissionsGranted(
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.RECORD_AUDIO
+        )) {
             record();
         }
     }
