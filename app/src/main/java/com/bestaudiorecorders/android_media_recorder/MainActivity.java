@@ -2,6 +2,9 @@ package com.bestaudiorecorders.android_media_recorder;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -18,7 +21,75 @@ import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
+    int frequency = 8000;
+    int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+    int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
+    private RealDoubleFFT transformer;
+    int blockSize = 256;
+
+    boolean started = false;
+    RecordAudio recordTask;
+
     MediaRecorder recorder;
+
+    public class RecordAudio extends AsyncTask<Void, double[], Void> {
+
+        @Override
+        protected Void doInBackground(Void... arg0) {
+
+            try {
+                // int bufferSize = AudioRecord.getMinBufferSize(frequency,
+                // AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+                int bufferSize = AudioRecord.getMinBufferSize(frequency,
+                        channelConfiguration, audioEncoding);
+
+                AudioRecord audioRecord = new AudioRecord(
+                        MediaRecorder.AudioSource.MIC, frequency,
+                        channelConfiguration, audioEncoding, bufferSize);
+
+                short[] buffer = new short[blockSize];
+                double[] toTransform = new double[blockSize];
+
+                audioRecord.startRecording();
+
+                // started = true; hopes this should true before calling
+                // following while loop
+
+                while (started) {
+                    int bufferReadResult = audioRecord.read(buffer, 0,
+                            blockSize);
+
+                    for (int i = 0; i < blockSize && i < bufferReadResult; i++) {
+                        toTransform[i] = (double) buffer[i] / 32768.0; // signed
+                        // 16
+                    }                                       // bit
+                    transformer.ft(toTransform);
+                    publishProgress(toTransform);
+                }
+
+                audioRecord.stop();
+
+            } catch (Throwable t) {
+                t.printStackTrace();
+                Log.e("AudioRecord", "Recording Failed");
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(double[]... toTransform) {
+            TextView textView;
+            textView = (TextView) findViewById(R.id.textView);
+            Log.d("onProgressUpdate", "Before for loop");
+            for (int i = 0; i < toTransform[0].length; i++) {
+                textView.setText("Freq at " + i + ": " + toTransform[0][i] * 10);
+            }
+            // TODO Auto-generated method stub
+            // super.onProgressUpdate(values);
+        }
+
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         if (recordPermissionGranted && writePermissionGranted) {
-            record();
+            //record();
         }
     }
 
@@ -94,13 +165,16 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.RECORD_AUDIO
         )) {
-            record();
+            //record();
+            recordTask = new RecordAudio();
+            recordTask.execute();
         }
     }
 
     public void onClick_stop(View v) {
-        recorder.stop();
-        recorder.reset();
-        recorder.release();
+        //recorder.stop();
+        //recorder.reset();
+        //recorder.release();
+        recordTask.cancel(true);
     }
 }
