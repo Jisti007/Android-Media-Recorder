@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import java.io.File;
 import java.util.Calendar;
@@ -77,6 +78,9 @@ public class MainActivity extends AppCompatActivity {
             Log.e("Main", e.getMessage());
         }
         recorder.start();
+
+        View recordText;
+        recordText = findViewById(R.id.recordText);
     }
 
     public void onClick_record(View v) {
