@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
+import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
 	Canvas canvas;
 	Paint paint;
 	Paint paint0;
+	int imgViewWidth;
+	int imgViewHeight;
 
     private class RecordAudio extends AsyncTask<Void, double[], Void> {
 
@@ -85,20 +88,20 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onProgressUpdate(double[]... toTransform) {
+
 	        final double calibration = 15.42137742;
 
 	        canvas.drawColor(Color.BLACK);
 
 	        for (int i = 0; i < toTransform[0].length; i++) {
-		        int x = i;
-		        int downy = (int) (100 - (toTransform[0][i] * 10));
-		        int upy = 200;
+		        int x = i*imgViewWidth/toTransform[0].length;
+		        int upy = imgViewHeight;
+		        int downy = (int) (upy - (toTransform[0][i] * upy/2));
 
-		        if (x%(int)(500/calibration) == 0) {
+		        if (i%(int)(500/calibration) == 0) {
 			        canvas.drawLine(x, 0, x, upy, paint0);
 		        }
-
-		        canvas.drawLine(x, downy*2, x, upy, paint);
+		        canvas.drawLine(x, downy, x, upy, paint);
 	        }
 
 	        imageView.invalidate();
@@ -116,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
             }
             for (int i = 0; i < toTransform[0].length; i++) {
 	            if (maxY*2/3 < toTransform[0][i]) {
-		            textView.setText("Base note: " + (int)(i*calibration));
+		            textView.setText("Amplitude: " + Math.round(maxY*100.0)/100.0 + "\nFreq: " + (int)(i*calibration));
 		            break;
 	            }
             }
@@ -132,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 	    recordButton.setTag(0);
 	    recordButton.setText(R.string.recodButtonText_record);
 
-	    imageView = (ImageView) this.findViewById(R.id.imageView);
+	    /*imageView = (ImageView) this.findViewById(R.id.imageView);
 	    bitmap = Bitmap.createBitmap(512, 200,
 		    Bitmap.Config.ARGB_8888);
 	    canvas = new Canvas(bitmap);
@@ -141,7 +144,27 @@ public class MainActivity extends AppCompatActivity {
 	    imageView.setImageBitmap(bitmap);
 
 	    paint0 = new Paint();
-	    paint0.setColor(Color.WHITE);
+	    paint0.setColor(Color.WHITE);*/
+    }
+
+    public void onWindowFocusChanged(boolean hasFocus) {
+
+	    super.onWindowFocusChanged(hasFocus);
+	    if(hasFocus) {
+		    imageView = (ImageView) this.findViewById(R.id.imageView);
+		    imgViewWidth = imageView.getWidth();
+		    imgViewHeight = imageView.getHeight();
+		    bitmap = Bitmap.createBitmap(imgViewWidth, imgViewHeight,
+			    Bitmap.Config.ARGB_8888);
+		    Log.d("ImgView dimensions", "Width: " + imageView.getWidth() + " Height: " + imageView.getHeight());
+		    canvas = new Canvas(bitmap);
+		    paint = new Paint();
+		    paint.setColor(Color.GREEN);
+		    imageView.setImageBitmap(bitmap);
+
+		    paint0 = new Paint();
+		    paint0.setColor(Color.WHITE);
+	    }
     }
 
     public boolean arePermissionsGranted(String... permissions) {
