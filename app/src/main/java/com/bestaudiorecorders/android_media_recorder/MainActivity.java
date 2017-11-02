@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onProgressUpdate(double[]... toTransform) {
+	        final int calibration = 1;
 
 	        canvas.drawColor(Color.BLACK);
 
@@ -93,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 		        int downy = (int) (100 - (toTransform[0][i] * 10));
 		        int upy = 200;
 
-		        if (x%(500/15) == 0) {
+		        if (x%(500/calibration) == 0) {
 			        canvas.drawLine(x, 0, x, upy, paint0);
 		        }
 
@@ -115,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             }
             for (int i = 0; i < toTransform[0].length; i++) {
 	            if (maxY*2/3 < toTransform[0][i]) {
-		            textView.setText("Base note: " + i*15);
+		            textView.setText("Base note: " + i*calibration);
 		            break;
 	            }
             }
@@ -190,7 +191,9 @@ public class MainActivity extends AppCompatActivity {
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-        path.mkdirs();
+	    if (!path.mkdirs()) {
+		    Log.e("record", "Failed to create path.");
+	    }
 
 	    Calendar cal = Calendar.getInstance();
 	    SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
