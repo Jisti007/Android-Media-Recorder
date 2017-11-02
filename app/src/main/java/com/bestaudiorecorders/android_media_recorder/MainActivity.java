@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onProgressUpdate(double[]... toTransform) {
-	        final int calibration = 1;
+	        final double calibration = 15.42137742;
 
 	        canvas.drawColor(Color.BLACK);
 
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 		        int downy = (int) (100 - (toTransform[0][i] * 10));
 		        int upy = 200;
 
-		        if (x%(500/calibration) == 0) {
+		        if (x%(int)(500/calibration) == 0) {
 			        canvas.drawLine(x, 0, x, upy, paint0);
 		        }
 
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             }
             for (int i = 0; i < toTransform[0].length; i++) {
 	            if (maxY*2/3 < toTransform[0][i]) {
-		            textView.setText("Base note: " + i*calibration);
+		            textView.setText("Base note: " + (int)(i*calibration));
 		            break;
 	            }
             }
