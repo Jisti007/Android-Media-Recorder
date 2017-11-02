@@ -36,43 +36,31 @@ public class MainActivity extends AppCompatActivity {
     MediaRecorder recorder;
 	private Button recordButton;
 
-    public class RecordAudio extends AsyncTask<Void, double[], Void> {
+    private class RecordAudio extends AsyncTask<Void, double[], Void> {
 
         @Override
         protected Void doInBackground(Void... arg0) {
-            Log.d("doInBackground", "start in background");
             try {
-                // int bufferSize = AudioRecord.getMinBufferSize(sampleRate,
-                // AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-                int bufferSize = AudioRecord.getMinBufferSize(sampleRate,
-                        channelConfiguration, audioEncoding);
+                int bufferSize = AudioRecord.getMinBufferSize(
+                    sampleRate, channelConfiguration, audioEncoding);
 
                 AudioRecord audioRecord = new AudioRecord(
-                        MediaRecorder.AudioSource.MIC, sampleRate,
-                        channelConfiguration, audioEncoding, bufferSize);
-                Log.d("doInBackground", "initialization success");
+                    MediaRecorder.AudioSource.MIC, sampleRate,
+                    channelConfiguration, audioEncoding, bufferSize);
 
                 short[] buffer = new short[blockSize];
                 double[] toTransform = new double[blockSize];
 
                 audioRecord.startRecording();
-                Log.d("doInBackground", "starting success");
-
-                // started = true; hopes this should true before calling
-                // following while loop
 
                 while (started) {
-                    int bufferReadResult = audioRecord.read(buffer, 0,
-                            blockSize);
-
+                    int bufferReadResult = audioRecord.read(buffer, 0, blockSize);
                     for (int i = 0; i < blockSize && i < bufferReadResult; i++) {
-                        toTransform[i] = (double) buffer[i] / 32768.0; // signed
-                        // 16
-                    }                                       // bit
+                        toTransform[i] = (double) buffer[i] / 32768.0;
+                    }
                     transformer.ft(toTransform);
                     publishProgress(toTransform);
                 }
-                Log.d("doInBackground", "Loop success");
 
                 audioRecord.stop();
 
@@ -107,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 	    recordButton = (Button) findViewById(R.id.recordButton);
 	    recordButton.setTag(0);
-	    recordButton.setText("Record");
+	    recordButton.setText(R.string.recodButtonText_record);
     }
 
     public boolean arePermissionsGranted(String... permissions) {
@@ -187,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
                 started = true;
                 recordTask.execute();
 		        //record();
-		        recordButton.setText("Stop");
+		        recordButton.setText(R.string.recordButtonText_stop);
 		        v.setTag(1);
 	        } else {
 		        //recorder.stop();
@@ -196,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                 started = false;
                 recordTask.cancel(true);
 		        Toast.makeText(this, "Recording stopped", Toast.LENGTH_SHORT).show();
-		        recordButton.setText("Record");
+		        recordButton.setText(R.string.recodButtonText_record);
 		        v.setTag(0);
 	        }
         }

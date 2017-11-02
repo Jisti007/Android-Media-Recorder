@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Android-Media-Recorder</string>
+    <string name="recodButtonText_record">Record</string>
+    <string name="recordButtonText_stop">Stop</string>
 </resources>
