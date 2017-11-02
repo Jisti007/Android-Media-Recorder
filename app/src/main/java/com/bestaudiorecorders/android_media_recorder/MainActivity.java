@@ -2,6 +2,10 @@ package com.bestaudiorecorders.android_media_recorder;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.os.AsyncTask;
@@ -14,20 +18,22 @@ import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    int sampleRate = 8000;
+    int sampleRate = 16000;
     int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
     int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
-    int blockSize = 256;
+    int blockSize = 512;
     private RealDoubleFFT transformer = new RealDoubleFFT(blockSize);
 
     boolean started = false;
@@ -35,6 +41,12 @@ public class MainActivity extends AppCompatActivity {
 
     MediaRecorder recorder;
 	private Button recordButton;
+
+	ImageView imageView;
+	Bitmap bitmap;
+	Canvas canvas;
+	Paint paint;
+	Paint paint0;
 
     private class RecordAudio extends AsyncTask<Void, double[], Void> {
 
@@ -73,21 +85,43 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onProgressUpdate(double[]... toTransform) {
+
+	        canvas.drawColor(Color.BLACK);
+
+	        for (int i = 0; i < toTransform[0].length; i++) {
+		        int x = i;
+		        int downy = (int) (100 - (toTransform[0][i] * 10));
+		        int upy = 200;
+
+		        if (x%(500/15) == 0) {
+			        canvas.drawLine(x, 0, x, upy, paint0);
+		        }
+
+		        canvas.drawLine(x, downy*2, x, upy, paint);
+	        }
+
+	        imageView.invalidate();
             TextView textView;
             textView = (TextView) findViewById(R.id.textView);
             int x = 0;
             double maxY = 0;
+	        ArrayList<Integer> array = new ArrayList<>();
+
             for (int i = 0; i < toTransform[0].length; i++) {
                 if(maxY < toTransform[0][i]){
                     x = i;
                     maxY = toTransform[0][i];
                 }
             }
-            textView.setText("Strongest freq: " + x*15);
+            for (int i = 0; i < toTransform[0].length; i++) {
+	            if (maxY*2/3 < toTransform[0][i]) {
+		            textView.setText("Base note: " + i*15);
+		            break;
+	            }
+            }
         }
 
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +130,17 @@ public class MainActivity extends AppCompatActivity {
 	    recordButton = (Button) findViewById(R.id.recordButton);
 	    recordButton.setTag(0);
 	    recordButton.setText(R.string.recodButtonText_record);
+
+	    imageView = (ImageView) this.findViewById(R.id.imageView);
+	    bitmap = Bitmap.createBitmap(512, 200,
+		    Bitmap.Config.ARGB_8888);
+	    canvas = new Canvas(bitmap);
+	    paint = new Paint();
+	    paint.setColor(Color.GREEN);
+	    imageView.setImageBitmap(bitmap);
+
+	    paint0 = new Paint();
+	    paint0.setColor(Color.WHITE);
     }
 
     public boolean arePermissionsGranted(String... permissions) {
