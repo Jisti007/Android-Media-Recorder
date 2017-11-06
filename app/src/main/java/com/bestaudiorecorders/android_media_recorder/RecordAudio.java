@@ -94,7 +94,7 @@ class RecordAudio extends AsyncTask<Void, double[], Void> {
 		for (int i = 0; i < toTransform[0].length; i++) {
 			int x = i*imgViewWidth/toTransform[0].length;
 			int bottomy = imgViewHeight;
-			int topy = (int) (bottomy - (bottomy*toTransform[0][i]/Math.log10(toTransform[0][i])));
+			int topy = (int) (bottomy - toTransform[0][i]);
 
 			if (i%(int)(500/calibration) == 0) {
 				canvas.drawLine(x, 0, x, bottomy, paint0);
