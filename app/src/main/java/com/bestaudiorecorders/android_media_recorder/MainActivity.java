@@ -30,102 +30,9 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
-
-    int sampleRate = 16000;
-    int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
-    int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
-    int blockSize = 512;
-    private RealDoubleFFT transformer = new RealDoubleFFT(blockSize);
-
-    boolean started = false;
-    RecordAudio recordTask;
-
+	RecordAudio recordTask;
     MediaRecorder recorder;
 	private Button recordButton;
-
-	ImageView imageView;
-	Bitmap bitmap;
-	Canvas canvas;
-	Paint paint;
-	Paint paint0;
-	int imgViewWidth;
-	int imgViewHeight;
-
-    private class RecordAudio extends AsyncTask<Void, double[], Void> {
-
-        @Override
-        protected Void doInBackground(Void... arg0) {
-            try {
-                int bufferSize = AudioRecord.getMinBufferSize(
-                    sampleRate, channelConfiguration, audioEncoding);
-
-                AudioRecord audioRecord = new AudioRecord(
-                    MediaRecorder.AudioSource.MIC, sampleRate,
-                    channelConfiguration, audioEncoding, bufferSize);
-
-                short[] buffer = new short[blockSize];
-                double[] toTransform = new double[blockSize];
-
-                audioRecord.startRecording();
-
-                while (started) {
-                    int bufferReadResult = audioRecord.read(buffer, 0, blockSize);
-                    for (int i = 0; i < blockSize && i < bufferReadResult; i++) {
-                        toTransform[i] = (double) buffer[i] / 32768.0;
-                    }
-                    transformer.ft(toTransform);
-                    publishProgress(toTransform);
-                }
-
-                audioRecord.stop();
-
-            } catch (Throwable t) {
-                t.printStackTrace();
-                Log.e("AudioRecord", "Recording Failed");
-            }
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(double[]... toTransform) {
-
-	        final double calibration = 15.42137742;
-
-	        canvas.drawColor(Color.BLACK);
-
-	        for (int i = 0; i < toTransform[0].length; i++) {
-		        int x = i*imgViewWidth/toTransform[0].length;
-		        int bottomy = imgViewHeight;
-		        int topy = (int) (bottomy - (bottomy*toTransform[0][i]/Math.log10(toTransform[0][i])));
-
-		        if (i%(int)(500/calibration) == 0) {
-			        canvas.drawLine(x, 0, x, bottomy, paint0);
-		        }
-		        canvas.drawLine(x, topy, x, bottomy, paint);
-	        }
-
-	        imageView.invalidate();
-            TextView textView;
-            textView = (TextView) findViewById(R.id.textView);
-            int x = 0;
-            double maxY = 0;
-	        ArrayList<Integer> array = new ArrayList<>();
-
-            for (int i = 0; i < toTransform[0].length; i++) {
-                if(maxY < toTransform[0][i]){
-                    x = i;
-                    maxY = toTransform[0][i];
-                }
-            }
-            for (int i = 0; i < toTransform[0].length; i++) {
-	            if (maxY*2/3 < toTransform[0][i]) {
-		            textView.setText("Amplitude: " + Math.round(maxY*100.0)/100.0 + "\nFreq: " + (int)(i*calibration));
-		            break;
-	            }
-            }
-        }
-
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,37 +41,16 @@ public class MainActivity extends AppCompatActivity {
 	    recordButton = (Button) findViewById(R.id.recordButton);
 	    recordButton.setTag(0);
 	    recordButton.setText(R.string.recodButtonText_record);
-
-	    /*imageView = (ImageView) this.findViewById(R.id.imageView);
-	    bitmap = Bitmap.createBitmap(512, 200,
-		    Bitmap.Config.ARGB_8888);
-	    canvas = new Canvas(bitmap);
-	    paint = new Paint();
-	    paint.setColor(Color.GREEN);
-	    imageView.setImageBitmap(bitmap);
-
-	    paint0 = new Paint();
-	    paint0.setColor(Color.WHITE);*/
     }
 
     public void onWindowFocusChanged(boolean hasFocus) {
 
 	    super.onWindowFocusChanged(hasFocus);
+	    /*
 	    if(hasFocus) {
-		    imageView = (ImageView) this.findViewById(R.id.imageView);
-		    imgViewWidth = imageView.getWidth();
-		    imgViewHeight = imageView.getHeight();
-		    bitmap = Bitmap.createBitmap(imgViewWidth, imgViewHeight,
-			    Bitmap.Config.ARGB_8888);
-		    Log.d("ImgView dimensions", "Width: " + imageView.getWidth() + " Height: " + imageView.getHeight());
-		    canvas = new Canvas(bitmap);
-		    paint = new Paint();
-		    paint.setColor(Color.GREEN);
-		    imageView.setImageBitmap(bitmap);
 
-		    paint0 = new Paint();
-		    paint0.setColor(Color.WHITE);
 	    }
+	    */
     }
 
     public boolean arePermissionsGranted(String... permissions) {
@@ -242,8 +128,8 @@ public class MainActivity extends AppCompatActivity {
         )) {
             int status =(Integer) v.getTag();
 	        if(status == 0) {
-                recordTask = new RecordAudio();
-                started = true;
+                recordTask = new RecordAudio(this);
+               // started = true;
                 recordTask.execute();
 		        //record();
 		        recordButton.setText(R.string.recordButtonText_stop);
@@ -252,7 +138,8 @@ public class MainActivity extends AppCompatActivity {
 		        //recorder.stop();
 		        //recorder.reset();
 		        //recorder.release();
-                started = false;
+                //started = false;
+		        recordTask.stop();
                 recordTask.cancel(true);
 		        Toast.makeText(this, "Recording stopped", Toast.LENGTH_SHORT).show();
 		        recordButton.setText(R.string.recodButtonText_record);
