@@ -15,9 +15,10 @@
         android:text="Record"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="32dp"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"/>
+        android:layout_marginBottom="38dp"
+        android:layout_marginLeft="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintHorizontal_bias="0.055"/>
 
     <TextView
         android:id="@+id/textView"
@@ -53,12 +54,13 @@
         android:layout_height="wrap_content"
         android:text="Get file"
         android:onClick="onClick_getFile"
-        app:layout_constraintLeft_toRightOf="@+id/recordButton"
-        android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="32dp"/>
+        android:layout_marginBottom="38dp"
+        app:layout_constraintLeft_toRightOf="@+id/recordButton"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintHorizontal_bias="0.0"/>
 
     <TextView
         android:id="@+id/textView2"
@@ -69,5 +71,19 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/playActiveFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="38dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:text="Play active file"
+        android:onClick="onClick_playActiveFile"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toRightOf="@+id/getFileButton"
+        app:layout_constraintRight_toRightOf="parent"/>
 
 </android.support.constraint.ConstraintLayout>

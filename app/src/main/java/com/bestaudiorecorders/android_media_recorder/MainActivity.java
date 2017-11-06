@@ -4,16 +4,20 @@ import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.OpenableColumns;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -58,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
 	TextView currentFileView;
 
 	final int PICKFILE_RESULT_CODE = 0;
+	Uri activeFile;
+	private Button playActiveFileButton;
+
+	static MediaPlayer mediaPlayer;
 
     private class RecordAudio extends AsyncTask<Void, double[], Void> {
 
@@ -145,6 +153,12 @@ public class MainActivity extends AppCompatActivity {
 
 	    currentFileView = (TextView) findViewById(R.id.textView2);
 	    currentFileView.setText("No file selected");
+
+		playActiveFileButton = (Button) findViewById(R.id.playActiveFile);
+	    playActiveFileButton.setTag(0);
+	    playActiveFileButton.setText("Play active file");
+
+	    activeFile = null;
 
 	    /*imageView = (ImageView) this.findViewById(R.id.imageView);
 	    bitmap = Bitmap.createBitmap(512, 200,
@@ -289,6 +303,38 @@ public class MainActivity extends AppCompatActivity {
 		    }
     }
 
+	public void onClick_playActiveFile(View v) {
+
+		int status = (Integer) v.getTag();
+
+		if (activeFile != null) {
+			mediaPlayer = MediaPlayer.create(this, activeFile);
+
+			if (status == 0) {
+
+				try {
+					mediaPlayer.start();
+
+					playActiveFileButton.setText("Stop playback");
+					v.setTag(1);
+				} catch (Exception e) {
+					Log.e("onClick_playActiveFile:", e.toString());
+					Toast.makeText(this, "Failed to open file " + activeFile, Toast.LENGTH_SHORT).show();
+				}
+			} else {
+				// TODO: fix mediaplayer not stopping
+				mediaPlayer.stop();
+				mediaPlayer.reset();
+				//mediaPlayer.prepare();
+				mediaPlayer.release();
+				mediaPlayer = MediaPlayer.create(this, activeFile);
+
+				Toast.makeText(this, "Playback stopped", Toast.LENGTH_SHORT).show();
+				playActiveFileButton.setText("Play active file");
+				v.setTag(0);
+			}
+		}
+	}
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// TODO Fix no activity available
 		if (data == null)
@@ -296,11 +342,17 @@ public class MainActivity extends AppCompatActivity {
 		switch (requestCode) {
 			case PICKFILE_RESULT_CODE:
 				if (resultCode == RESULT_OK) {
-					File f = new File(data.getData().getPath());
-					String FilePath = data.getData().getPath();
+					//Get active audio file name
+					Uri returnUri = data.getData();
+					Cursor returnCursor = getContentResolver().query(returnUri, null, null, null, null);
+					int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+					returnCursor.moveToFirst();
+					currentFileView.setText("Active file: " + returnCursor.getString(nameIndex) );
+
 					//FilePath is your file as a string
-					currentFileView.setText("Active file path: " + f.getName());
-				}
+					String FilePath = data.getData().getPath();
+					activeFile = data.getData();
+					}
 		}
 	}
 
