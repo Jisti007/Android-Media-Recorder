@@ -105,13 +105,10 @@ class RecordAudio extends AsyncTask<Void, double[], Void> {
 		imageView.invalidate();
 		TextView textView;
 		textView = (TextView) activity.findViewById(R.id.textView);
-		int x = 0;
 		double maxY = 0;
-		ArrayList<Integer> array = new ArrayList<>();
 
 		for (int i = 0; i < toTransform[0].length; i++) {
 			if(maxY < toTransform[0][i]){
-				x = i;
 				maxY = toTransform[0][i];
 			}
 		}
