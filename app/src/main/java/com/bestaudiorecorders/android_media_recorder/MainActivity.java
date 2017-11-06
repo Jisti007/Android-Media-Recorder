@@ -1,6 +1,8 @@
 package com.bestaudiorecorders.android_media_recorder;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -35,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
 	RecordAudio recordTask;
     MediaRecorder recorder;
 	private Button recordButton;
+	private TextView currentFileView;
+	final int PICKFILE_RESULT_CODE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
