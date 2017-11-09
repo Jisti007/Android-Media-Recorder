@@ -183,11 +183,11 @@ public class MainActivity extends AppCompatActivity {
 		int status = (Integer) v.getTag();
 
 		if (activeFile != null) {
-			mediaPlayer = MediaPlayer.create(this, activeFile);
 
 			if (status == 0) {
 
 				try {
+					mediaPlayer = MediaPlayer.create(this, activeFile);
 					mediaPlayer.start();
 
 					playActiveFileButton.setText("Stop playback");
@@ -197,17 +197,24 @@ public class MainActivity extends AppCompatActivity {
 					Toast.makeText(this, "Failed to open file " + activeFile, Toast.LENGTH_SHORT).show();
 				}
 			} else {
-				// TODO: fix mediaplayer not stopping
-				mediaPlayer.stop();
-				mediaPlayer.reset();
-				//mediaPlayer.prepare();
-				mediaPlayer.release();
-				mediaPlayer = MediaPlayer.create(this, activeFile);
+				try {
 
-				Toast.makeText(this, "Playback stopped", Toast.LENGTH_SHORT).show();
-				playActiveFileButton.setText("Play active file");
-				v.setTag(0);
+					mediaPlayer.reset();
+					mediaPlayer.stop();
+					//mediaPlayer.release();
+					//mediaPlayer=null;
+
+					Toast.makeText(this, "Playback stopped", Toast.LENGTH_SHORT).show();
+					playActiveFileButton.setText("Play active file");
+					v.setTag(0);
+
+				} catch (Exception e) {
+					Log.e("Mediaplayer", "x*D " + e.toString());
+					Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
+				}
 			}
+		} else {
+			Toast.makeText(this, "Please select a file", Toast.LENGTH_SHORT).show();
 		}
 	}
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
