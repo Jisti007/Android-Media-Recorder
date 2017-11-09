@@ -87,10 +87,9 @@ class RecordAudio extends AsyncTask<Void, double[], Void> {
 
 			while (started) {
 				int bufferReadResult = audioRecord.read(buffer, 0, blockSize, AudioRecord.READ_BLOCKING);
-				int[] sample = new int[blockSize];
 				for (int i = 0; i < blockSize && i < bufferReadResult; i++) {
 					toTransform[i] = (double) buffer[i];
-					samples.add((int)buffer[i]);
+					samples.add((int)(buffer[i] * 1000));
 				}
 				transformer.ft(toTransform);
 				publishProgress(toTransform);
@@ -168,6 +167,8 @@ class RecordAudio extends AsyncTask<Void, double[], Void> {
 			int sampleDepth = 32;
 			info.sampleDepth = sampleDepth;
 			info.numSamples = samples.size();
+			info.minBlockSize = blockSize;
+			info.maxBlockSize = blockSize;
 			int[][] sampleArray = new int[1][samples.size()];
 			for (int i = 0; i < samples.size(); i++) {
 				sampleArray[0][i] = samples.get(i);
