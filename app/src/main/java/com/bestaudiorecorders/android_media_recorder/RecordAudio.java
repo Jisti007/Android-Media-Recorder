@@ -167,8 +167,6 @@ class RecordAudio extends AsyncTask<Void, double[], Void> {
 			int sampleDepth = 32;
 			info.sampleDepth = sampleDepth;
 			info.numSamples = samples.size();
-			info.minBlockSize = blockSize;
-			info.maxBlockSize = blockSize;
 			int[][] sampleArray = new int[1][samples.size()];
 			for (int i = 0; i < samples.size(); i++) {
 				sampleArray[0][i] = samples.get(i);
@@ -177,7 +175,7 @@ class RecordAudio extends AsyncTask<Void, double[], Void> {
 			info.write(true, out);
 
 			// Encode all frames
-			new FlacEncoder(info, sampleArray, 4096, SubframeEncoder.SearchOptions.SUBSET_BEST, out);
+			new FlacEncoder(info, sampleArray, blockSize, SubframeEncoder.SearchOptions.SUBSET_BEST, out);
 			out.flush();
 
 			// Rewrite the stream info metadata block, which is
