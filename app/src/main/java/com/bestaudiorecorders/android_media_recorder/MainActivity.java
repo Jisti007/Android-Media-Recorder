@@ -1,16 +1,23 @@
 package com.bestaudiorecorders.android_media_recorder;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.OpenableColumns;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,111 +25,24 @@ import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
-
-    int sampleRate = 16000;
-    int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
-    int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
-    int blockSize = 512;
-    private RealDoubleFFT transformer = new RealDoubleFFT(blockSize);
-
-    boolean started = false;
-    RecordAudio recordTask;
-
+	RecordAudio recordTask;
     MediaRecorder recorder;
 	private Button recordButton;
+	private TextView currentFileView;
+	final int PICKFILE_RESULT_CODE = 0;
+	Uri activeFile;
+	private Button playActiveFileButton;
 
-	ImageView imageView;
-	Bitmap bitmap;
-	Canvas canvas;
-	Paint paint;
-	Paint paint0;
-
-    private class RecordAudio extends AsyncTask<Void, double[], Void> {
-
-        @Override
-        protected Void doInBackground(Void... arg0) {
-            try {
-                int bufferSize = AudioRecord.getMinBufferSize(
-                    sampleRate, channelConfiguration, audioEncoding);
-
-                AudioRecord audioRecord = new AudioRecord(
-                    MediaRecorder.AudioSource.MIC, sampleRate,
-                    channelConfiguration, audioEncoding, bufferSize);
-
-                short[] buffer = new short[blockSize];
-                double[] toTransform = new double[blockSize];
-
-                audioRecord.startRecording();
-
-                while (started) {
-                    int bufferReadResult = audioRecord.read(buffer, 0, blockSize);
-                    for (int i = 0; i < blockSize && i < bufferReadResult; i++) {
-                        toTransform[i] = (double) buffer[i] / 32768.0;
-                    }
-                    transformer.ft(toTransform);
-                    publishProgress(toTransform);
-                }
-
-                audioRecord.stop();
-
-            } catch (Throwable t) {
-                t.printStackTrace();
-                Log.e("AudioRecord", "Recording Failed");
-            }
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(double[]... toTransform) {
-	        final double calibration = 15.42137742;
-
-	        canvas.drawColor(Color.BLACK);
-
-	        for (int i = 0; i < toTransform[0].length; i++) {
-		        int x = i;
-		        int downy = (int) (100 - (toTransform[0][i] * 10));
-		        int upy = 200;
-
-		        if (x%(int)(500/calibration) == 0) {
-			        canvas.drawLine(x, 0, x, upy, paint0);
-		        }
-
-		        canvas.drawLine(x, downy*2, x, upy, paint);
-	        }
-
-	        imageView.invalidate();
-            TextView textView;
-            textView = (TextView) findViewById(R.id.textView);
-            int x = 0;
-            double maxY = 0;
-	        ArrayList<Integer> array = new ArrayList<>();
-
-            for (int i = 0; i < toTransform[0].length; i++) {
-                if(maxY < toTransform[0][i]){
-                    x = i;
-                    maxY = toTransform[0][i];
-                }
-            }
-            for (int i = 0; i < toTransform[0].length; i++) {
-	            if (maxY*2/3 < toTransform[0][i]) {
-		            textView.setText("Base note: " + (int)(i*calibration));
-		            break;
-	            }
-            }
-        }
-
-    }
+	static MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,16 +52,18 @@ public class MainActivity extends AppCompatActivity {
 	    recordButton.setTag(0);
 	    recordButton.setText(R.string.recodButtonText_record);
 
-	    imageView = (ImageView) this.findViewById(R.id.imageView);
-	    bitmap = Bitmap.createBitmap(512, 200,
-		    Bitmap.Config.ARGB_8888);
-	    canvas = new Canvas(bitmap);
-	    paint = new Paint();
-	    paint.setColor(Color.GREEN);
-	    imageView.setImageBitmap(bitmap);
+	    currentFileView = (TextView) findViewById(R.id.textView2);
+	    currentFileView.setText("No file selected");
 
-	    paint0 = new Paint();
-	    paint0.setColor(Color.WHITE);
+		playActiveFileButton = (Button) findViewById(R.id.playActiveFile);
+	    playActiveFileButton.setTag(0);
+	    playActiveFileButton.setText("Play active file");
+
+	    activeFile = null;
+    }
+
+    public void onWindowFocusChanged(boolean hasFocus) {
+	    super.onWindowFocusChanged(hasFocus);
     }
 
     public boolean arePermissionsGranted(String... permissions) {
@@ -219,8 +141,8 @@ public class MainActivity extends AppCompatActivity {
         )) {
             int status =(Integer) v.getTag();
 	        if(status == 0) {
-                recordTask = new RecordAudio();
-                started = true;
+                recordTask = new RecordAudio(this);
+               // started = true;
                 recordTask.execute();
 		        //record();
 		        recordButton.setText(R.string.recordButtonText_stop);
@@ -229,7 +151,8 @@ public class MainActivity extends AppCompatActivity {
 		        //recorder.stop();
 		        //recorder.reset();
 		        //recorder.release();
-                started = false;
+                //started = false;
+		        recordTask.stop();
                 recordTask.cancel(true);
 		        Toast.makeText(this, "Recording stopped", Toast.LENGTH_SHORT).show();
 		        recordButton.setText(R.string.recodButtonText_record);
@@ -237,4 +160,75 @@ public class MainActivity extends AppCompatActivity {
 	        }
         }
     }
+
+    public void onClick_getFile(View v) {
+	    if (arePermissionsGranted(
+		    Manifest.permission.READ_EXTERNAL_STORAGE
+	    )) {
+		    Intent fileintent = new Intent(Intent.ACTION_GET_CONTENT);
+		    fileintent.setType("audio/*");
+		    try {
+			    startActivityForResult(fileintent, PICKFILE_RESULT_CODE);
+		    } catch (ActivityNotFoundException e) {
+			    Log.e("tag", "No activity can handle picking a file. Showing alternatives.");
+		    }
+
+		    } else {
+			    Toast.makeText(this, "Something went wrong, please allow file reading for the app", Toast.LENGTH_SHORT).show();
+		    }
+    }
+
+	public void onClick_playActiveFile(View v) {
+
+		int status = (Integer) v.getTag();
+
+		if (activeFile != null) {
+			mediaPlayer = MediaPlayer.create(this, activeFile);
+
+			if (status == 0) {
+
+				try {
+					mediaPlayer.start();
+
+					playActiveFileButton.setText("Stop playback");
+					v.setTag(1);
+				} catch (Exception e) {
+					Log.e("onClick_playActiveFile:", e.toString());
+					Toast.makeText(this, "Failed to open file " + activeFile, Toast.LENGTH_SHORT).show();
+				}
+			} else {
+				// TODO: fix mediaplayer not stopping
+				mediaPlayer.stop();
+				mediaPlayer.reset();
+				//mediaPlayer.prepare();
+				mediaPlayer.release();
+				mediaPlayer = MediaPlayer.create(this, activeFile);
+
+				Toast.makeText(this, "Playback stopped", Toast.LENGTH_SHORT).show();
+				playActiveFileButton.setText("Play active file");
+				v.setTag(0);
+			}
+		}
+	}
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Fix no activity available
+		if (data == null)
+			return;
+		switch (requestCode) {
+			case PICKFILE_RESULT_CODE:
+				if (resultCode == RESULT_OK) {
+					//Get active audio file name
+					Uri returnUri = data.getData();
+					Cursor returnCursor = getContentResolver().query(returnUri, null, null, null, null);
+					int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+					returnCursor.moveToFirst();
+					currentFileView.setText("Active file: " + returnCursor.getString(nameIndex) );
+
+					//FilePath is your file as a string
+					String FilePath = data.getData().getPath();
+					activeFile = data.getData();
+					}
+		}
+	}
+
 }
