@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">Android-Media-Recorder</string>
-    <string name="recodButtonText_record">Record</string>
+    <string name="recordButtonText_record">Record</string>
     <string name="recordButtonText_stop">Stop</string>
+    <string name="playButtonText_play">Play active file</string>
+    <string name="playButtonText_stop">Stop playback</string>
+    <string name="label_activeFile">Active file: </string>
+    <string name="label_noFileSelected">No file selected</string>
 </resources>

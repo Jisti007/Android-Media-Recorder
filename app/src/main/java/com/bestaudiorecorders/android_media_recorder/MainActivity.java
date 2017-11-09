@@ -5,23 +5,20 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.media.AudioFormat;
-import android.media.AudioRecord;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.nfc.Tag;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.OpenableColumns;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.media.MediaRecorder;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -33,7 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+/*public class MainActivity extends AppCompatActivity {
 	RecordAudio recordTask;
     MediaRecorder recorder;
 	private Button recordButton;
@@ -44,22 +41,23 @@ public class MainActivity extends AppCompatActivity {
 
 	static MediaPlayer mediaPlayer;
 
-    @Override
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 	    recordButton = (Button) findViewById(R.id.recordButton);
 	    recordButton.setTag(0);
-	    recordButton.setText(R.string.recodButtonText_record);
+	    recordButton.setText(R.string.recordButtonText_record);
 
 	    currentFileView = (TextView) findViewById(R.id.textView2);
-	    currentFileView.setText("No file selected");
+	    currentFileView.setText(R.string.label_noFileSelected);
 
 		playActiveFileButton = (Button) findViewById(R.id.playActiveFile);
 	    playActiveFileButton.setTag(0);
-	    playActiveFileButton.setText("Play active file");
+	    playActiveFileButton.setText(R.string.playButtonText_play);
 
 	    activeFile = null;
+
     }
 
     public void onWindowFocusChanged(boolean hasFocus) {
@@ -134,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
 	    Toast.makeText(this, "Recording to" + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
     }
 
-    public void onClick_record(View v) {
+     public void onClick_record(View v) {
         if (arePermissionsGranted(
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.RECORD_AUDIO
@@ -155,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
 		        recordTask.stop();
                 recordTask.cancel(true);
 		        Toast.makeText(this, "Recording stopped", Toast.LENGTH_SHORT).show();
-		        recordButton.setText(R.string.recodButtonText_record);
+		        recordButton.setText(R.string.recordButtonText_record);
 		        v.setTag(0);
 	        }
         }
@@ -190,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
 					mediaPlayer = MediaPlayer.create(this, activeFile);
 					mediaPlayer.start();
 
-					playActiveFileButton.setText("Stop playback");
+					playActiveFileButton.setText(R.string.playButtonText_stop);
 					v.setTag(1);
 				} catch (Exception e) {
 					Log.e("onClick_playActiveFile:", e.toString());
@@ -205,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
 					//mediaPlayer=null;
 
 					Toast.makeText(this, "Playback stopped", Toast.LENGTH_SHORT).show();
-					playActiveFileButton.setText("Play active file");
+					playActiveFileButton.setText(R.string.playButtonText_play);
 					v.setTag(0);
 
 				} catch (Exception e) {
@@ -229,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
 					Cursor returnCursor = getContentResolver().query(returnUri, null, null, null, null);
 					int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
 					returnCursor.moveToFirst();
-					currentFileView.setText("Active file: " + returnCursor.getString(nameIndex) );
+					currentFileView.setText(R.string.label_activeFile + returnCursor.getString(nameIndex) );
 
 					//FilePath is your file as a string
 					String FilePath = data.getData().getPath();
@@ -239,3 +237,4 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 }
+*/

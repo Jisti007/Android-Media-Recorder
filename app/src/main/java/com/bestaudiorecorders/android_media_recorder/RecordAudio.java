@@ -15,7 +15,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 class RecordAudio extends AsyncTask<Void, double[], Void> {
-	private MainActivity activity;
+	private TunerFragment activity;
 
 	private int blockSize = 512;
 	private RealDoubleFFT transformer = new RealDoubleFFT(blockSize);
@@ -28,9 +28,9 @@ class RecordAudio extends AsyncTask<Void, double[], Void> {
 
 	private boolean started = true;
 
-	RecordAudio(MainActivity activity) {
+	RecordAudio(TunerFragment activity) {
 		this.activity = activity;
-		imageView = (ImageView) activity.findViewById(R.id.imageView);
+		imageView = (ImageView) activity.getView().findViewById(R.id.imageView);
 		imgViewWidth = imageView.getWidth();
 		imgViewHeight = imageView.getHeight();
 		Bitmap bitmap = Bitmap.createBitmap(imgViewWidth, imgViewHeight,
@@ -104,7 +104,7 @@ class RecordAudio extends AsyncTask<Void, double[], Void> {
 
 		imageView.invalidate();
 		TextView textView;
-		textView = (TextView) activity.findViewById(R.id.textView);
+		textView = (TextView) activity.getView().findViewById(R.id.textView);
 		double maxY = 0;
 
 		for (int i = 0; i < toTransform[0].length; i++) {
