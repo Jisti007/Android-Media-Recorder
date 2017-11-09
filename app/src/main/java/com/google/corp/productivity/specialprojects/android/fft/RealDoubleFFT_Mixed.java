@@ -24,7 +24,7 @@
  * @author Baoshe Zhang
  * @author Astronomical Instrument Group of University of Lethbridge.
  */
-package com.bestaudiorecorders.android_media_recorder;
+package com.google.corp.productivity.specialprojects.android.fft;
 
 class RealDoubleFFT_Mixed {
     static final int[] ntryh= new int[] {4, 2, 3, 5};

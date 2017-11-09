@@ -25,7 +25,7 @@
  * @author Astronomical Instrument Group of University of Lethbridge.
  */
 
-package com.bestaudiorecorders.android_media_recorder;
+package com.google.corp.productivity.specialprojects.android.fft;
 
 public class RealDoubleFFT extends RealDoubleFFT_Mixed {
     /**
