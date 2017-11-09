@@ -2,27 +2,14 @@ package com.bestaudiorecorders.android_media_recorder;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
 
 /**
  * Created by K1697 on 9.11.2017.
@@ -78,7 +65,7 @@ public class TunerFragment extends Fragment {
 
 	public void onClick_record(View v) {
 
-		MenuActivity activity = (MenuActivity) getActivity();
+		MainActivity activity = (MainActivity) getActivity();
 
 		if (activity.arePermissionsGranted(
 			Manifest.permission.WRITE_EXTERNAL_STORAGE,

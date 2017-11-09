@@ -5,7 +5,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.net.Uri;
 import android.provider.OpenableColumns;
 import android.support.v4.app.Fragment;
@@ -68,7 +67,7 @@ public class PlaybackFragment extends Fragment {
 	}
 
 	public void getFile(View v) {
-		MenuActivity activity = (MenuActivity) getActivity();
+		MainActivity activity = (MainActivity) getActivity();
 
 		if (activity.arePermissionsGranted(
 			Manifest.permission.READ_EXTERNAL_STORAGE
