@@ -71,7 +71,11 @@ public class RecorderFragment extends Fragment {
 			Log.e("Main", e.getMessage());
 		}
 		recorder.start();
-		Toast.makeText(getActivity(), "Recording to" + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+		Toast.makeText(
+			getActivity(),
+			getString(R.string.recordingPath) + file.getAbsolutePath(),
+			Toast.LENGTH_LONG
+		).show();
 	}
 
 	public void stop() {
@@ -93,7 +97,7 @@ public class RecorderFragment extends Fragment {
 				v.setTag(1);
 			} else {
 				stop();
-				Toast.makeText(getActivity(), "Recording stopped", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), R.string.recordingStopped, Toast.LENGTH_SHORT).show();
 				recordButton.setText(R.string.recordButtonText_record);
 				v.setTag(0);
 			}

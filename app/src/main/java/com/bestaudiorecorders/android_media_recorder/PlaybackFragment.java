@@ -24,7 +24,6 @@ import static android.app.Activity.RESULT_OK;
  */
 
 public class PlaybackFragment extends Fragment {
-
 	private TextView currentFileView;
 	final int PICKFILE_RESULT_CODE = 0;
 	Uri activeFile;
@@ -33,16 +32,14 @@ public class PlaybackFragment extends Fragment {
 
 	static MediaPlayer mediaPlayer;
 
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View rootView = inflater.inflate(R.layout.fragment_playback, container, false);
 
-
-		currentFileView = (TextView) rootView.findViewById(R.id.textView2);
+		currentFileView = rootView.findViewById(R.id.textView2);
 		currentFileView.setText(R.string.label_noFileSelected);
 
-		getFileButton = (Button) rootView.findViewById(R.id.getFileButton);
+		getFileButton = rootView.findViewById(R.id.getFileButton);
 		getFileButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -50,7 +47,7 @@ public class PlaybackFragment extends Fragment {
 			}
 		});
 
-		playActiveFileButton = (Button) rootView.findViewById(R.id.playActiveFile);
+		playActiveFileButton = rootView.findViewById(R.id.playActiveFile);
 		playActiveFileButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -59,7 +56,6 @@ public class PlaybackFragment extends Fragment {
 		});
 		playActiveFileButton.setTag(0);
 		playActiveFileButton.setText(R.string.playButtonText_play);
-
 
 		activeFile = null;
 
@@ -79,20 +75,16 @@ public class PlaybackFragment extends Fragment {
 			} catch (ActivityNotFoundException e) {
 				Log.e("tag", "No activity can handle picking a file. Showing alternatives.");
 			}
-
 		} else {
-			Toast.makeText(getActivity(), "Something went wrong, please allow file reading for the app", Toast.LENGTH_SHORT).show();
+			Toast.makeText(getActivity(), R.string.getFileError, Toast.LENGTH_SHORT).show();
 		}
 	}
 
 	public void playActiveFile(View v) {
-
 		int status = (Integer) v.getTag();
 
 		if (activeFile != null) {
-
 			if (status == 0) {
-
 				try {
 					mediaPlayer = MediaPlayer.create(getActivity(), activeFile);
 					mediaPlayer.start();
@@ -101,34 +93,32 @@ public class PlaybackFragment extends Fragment {
 					v.setTag(1);
 				} catch (Exception e) {
 					Log.e("playActiveFile:", e.toString());
-					Toast.makeText(getActivity(), "Failed to open file " + activeFile, Toast.LENGTH_SHORT).show();
+					Toast.makeText(getActivity(), getString(R.string.openFileError) + activeFile, Toast.LENGTH_SHORT).show();
 				}
 			} else {
 				try {
-
 					mediaPlayer.reset();
 					mediaPlayer.stop();
-					//mediaPlayer.release();
-					//mediaPlayer=null;
 
-					Toast.makeText(getActivity(), "Playback stopped", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getActivity(), R.string.playbackStopped, Toast.LENGTH_SHORT).show();
 					playActiveFileButton.setText(R.string.playButtonText_play);
 					v.setTag(0);
 
 				} catch (Exception e) {
 					Log.e("Mediaplayer", "x*D " + e.toString());
-					Toast.makeText(getActivity(), "Something went wrong", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getActivity(), R.string.playbackError, Toast.LENGTH_SHORT).show();
 				}
 			}
 		} else {
-			Toast.makeText(getActivity(), "Please select a file", Toast.LENGTH_SHORT).show();
+			Toast.makeText(getActivity(), R.string.selectFilePrompt, Toast.LENGTH_SHORT).show();
 		}
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// TODO Fix no activity available
-		if (data == null)
+		if (data == null) {
 			return;
+		}
 		switch (requestCode) {
 			case PICKFILE_RESULT_CODE:
 				if (resultCode == RESULT_OK) {
@@ -137,10 +127,14 @@ public class PlaybackFragment extends Fragment {
 					Cursor returnCursor = getActivity().getContentResolver().query(returnUri, null, null, null, null);
 					int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
 					returnCursor.moveToFirst();
-					currentFileView.setText("Active file: " + returnCursor.getString(nameIndex) );
+					currentFileView.setText(String.format("%s%s",
+						getString(R.string.activeFile),
+						returnCursor.getString(nameIndex)
+					));
+					returnCursor.close();
 
 					//FilePath is your file as a string
-					String FilePath = data.getData().getPath();
+					//String FilePath = data.getData().getPath();
 					activeFile = data.getData();
 				}
 		}

@@ -6,4 +6,13 @@
     <string name="playButtonText_stop">Stop playback</string>
     <string name="label_activeFile">Active file: </string>
     <string name="label_noFileSelected">No file selected</string>
+    <string name="recordingStopped">Recording stopped</string>
+    <string name="getFileError">Something went wrong, please allow file reading for the app</string>
+    <string name="openFileError">Failed to open file</string>
+    <string name="playbackStopped">Playback stopped</string>
+    <string name="playbackError">Something went wrong</string>
+    <string name="selectFilePrompt">Please select a file</string>
+    <string name="activeFile">Active file:</string>
+    <string name="recordingPath">Recording to</string>
+    <string name="amplitude">Amplitude:</string>
 </resources>

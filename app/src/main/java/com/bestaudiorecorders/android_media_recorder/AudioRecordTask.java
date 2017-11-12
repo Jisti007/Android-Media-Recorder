@@ -30,7 +30,7 @@ import io.nayuki.flac.encode.FlacEncoder;
 import io.nayuki.flac.encode.RandomAccessFileOutputStream;
 import io.nayuki.flac.encode.SubframeEncoder;
 
-class RecordAudio extends AsyncTask<Void, double[], Void> {
+class AudioRecordTask extends AsyncTask<Void, double[], Void> {
 	private TunerFragment activity;
 
 	private int sampleRate = 16000;
@@ -47,7 +47,7 @@ class RecordAudio extends AsyncTask<Void, double[], Void> {
 
 	private boolean started = true;
 
-	RecordAudio(TunerFragment activity) {
+	AudioRecordTask(TunerFragment activity) {
 		this.activity = activity;
 		imageView = (ImageView) activity.getView().findViewById(R.id.imageView);
 		imgViewWidth = imageView.getWidth();
@@ -107,7 +107,6 @@ class RecordAudio extends AsyncTask<Void, double[], Void> {
 
 	@Override
 	protected void onProgressUpdate(double[]... toTransform) {
-
 		final double calibration = 15.42137742;
 
 		canvas.drawColor(Color.BLACK);
@@ -125,7 +124,7 @@ class RecordAudio extends AsyncTask<Void, double[], Void> {
 
 		imageView.invalidate();
 		TextView textView;
-		textView = (TextView) activity.getView().findViewById(R.id.textView);
+		textView = activity.getView().findViewById(R.id.textView);
 		double maxY = 0;
 
 		for (int i = 0; i < toTransform[0].length; i++) {
@@ -135,7 +134,11 @@ class RecordAudio extends AsyncTask<Void, double[], Void> {
 		}
 		for (int i = 0; i < toTransform[0].length; i++) {
 			if (maxY*2/3 < toTransform[0][i]) {
-				textView.setText("Amplitude: " + Math.round(maxY*100.0)/100.0 + "\nFreq: " + (int)(i*calibration));
+				textView.setText(String.format(Locale.getDefault(), "%s%.2f\nFreq: %.2f",
+					activity.getString(R.string.amplitude),
+					maxY,
+					i * calibration
+				));
 				break;
 			}
 		}
