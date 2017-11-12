@@ -16,7 +16,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 		switch(position) {
 			case 0: return new PlaybackFragment();
 			case 1: return new TunerFragment();
-
+			case 2: return new RecorderFragment();
 		}
 		return null;
 	}
@@ -24,7 +24,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 	@Override
 	public int getCount() {
 		// Show page count
-		return 2;
+		return 3;
 	}
 
 	@Override
@@ -34,6 +34,8 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 				return "SECTION 1";
 			case 1:
 				return "SECTION 2";
+			case 2:
+				return "SECTION 3";
 		}
 		return null;
 	}

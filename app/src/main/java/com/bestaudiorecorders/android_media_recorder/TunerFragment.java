@@ -2,7 +2,6 @@ package com.bestaudiorecorders.android_media_recorder;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.media.MediaRecorder;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,7 +17,6 @@ import android.widget.Toast;
 public class TunerFragment extends Fragment {
 
 	RecordAudio recordTask;
-	MediaRecorder recorder;
 	private Button recordButton;
 
 	@Override
@@ -35,7 +33,6 @@ public class TunerFragment extends Fragment {
 
 		recordButton.setTag(0);
 		recordButton.setText(R.string.recordButtonText_record);
-
 
 		return rootView;
 	}
@@ -90,37 +87,7 @@ public class TunerFragment extends Fragment {
 				recordButton.setText(R.string.recordButtonText_record);
 				v.setTag(0);
 			}
-
-
 		}
 	}
-
-	/*public void record(){
-		recorder = new MediaRecorder();
-		recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
-		recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-		File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-		if (!path.mkdirs()) {
-			Log.e("record", "Failed to create path.");
-		}
-
-		Calendar cal = Calendar.getInstance();
-		SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
-		String formatted = format1.format(cal.getTime());
-		//default saving path: storage/emulated/0/Documents
-
-		File file = new File(path, "recording_" + formatted);
-		recorder.setOutputFile(file.getAbsolutePath());
-
-		try{
-			recorder.prepare();
-		} catch (Exception e) {
-			Log.e("Main", e.getMessage());
-		}
-		//recorder.start();
-		Toast.makeText(this, "Recording to" + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
-	}*/
-
 }
 
